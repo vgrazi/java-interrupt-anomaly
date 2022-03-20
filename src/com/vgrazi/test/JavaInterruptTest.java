@@ -21,7 +21,7 @@ public class JavaInterruptTest{
         // Thread 1 - grab a lock and wait.
         // Thread 2 - grab the lock and spin
         // main thread - interrupt thread 1
-        // main thread - wait 1000 MS and check interrupt flag
+        // main thread - wait 50 MS and check interrupt flag
         Logger logger = Logger.getLogger("Synchronized");
         CountDownLatch latch = new CountDownLatch(1);
         Object mutex = new Object();
@@ -32,7 +32,7 @@ public class JavaInterruptTest{
                     mutex.wait();
                 }catch(InterruptedException e){
                     Thread.currentThread().interrupt();
-                    logger.log(Level.WARNING, e, () -> "Interrupted exception. First thread re-raised interrupt flag");
+                    logger.log(Level.WARNING, e, () -> "First thread caught InterruptedException.  re-raised interrupt flag");
                     boolean interrupted = Thread.currentThread().isInterrupted();
                     logger.info("First thread Interrupted:" + interrupted);
                 }finally{
@@ -40,7 +40,7 @@ public class JavaInterruptTest{
                 }
             }});
         thread1.start();
-        Thread.sleep(1000);
+        Thread.sleep(50);
         Thread thread2 = new Thread(() -> {
             synchronized(mutex){
                 try{
@@ -54,17 +54,17 @@ public class JavaInterruptTest{
             }
         });
         thread2.start();
-        Thread.sleep(1000);
-        logger.info("Interrupting first thread");
+        Thread.sleep(50);
         thread1.interrupt();
-        Thread.sleep(1000);
+        logger.info("Interrupted first thread");
+        Thread.sleep(50);
         boolean interrupted;
         interrupted = thread1.isInterrupted();
         logger.info("First thread Interrupted:" + interrupted);
         // as expected the thread is interrupted
         logger.info("Releasing lock on second thread");
         latch.countDown();
-        Thread.sleep(1000);
+        Thread.sleep(50);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class JavaInterruptTest{
         // Thread 1 - grab a lock, create a condition, and await that condition.
         // Thread 2 - grab the lock and spin
         // main thread - interrupt thread 1
-        // main thread - wait 1000 MS and check interrupt flag
+        // main thread - wait 50 MS and check interrupt flag
         Logger logger = Logger.getLogger("ReentrantLock");
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -85,19 +85,19 @@ public class JavaInterruptTest{
                 condition.await();
                 boolean interrupted = Thread.currentThread().isInterrupted();
                 // huh? _Now_ the thread is interrupted??
-                logger.info("First thread Interrupted: HUH? " + interrupted);
+                logger.info("First thread Interrupted:.? " + interrupted);
             }catch(InterruptedException e){
                 Thread.currentThread().interrupt();
-                logger.log(Level.WARNING, e, () -> "Interrupted exception. First thread re-raised interrupt flag");
+                logger.log(Level.WARNING, e, () -> "First thread caught InterruptedException.  re-raised interrupt flag");
                 boolean interrupted = Thread.currentThread().isInterrupted();
-                logger.info("First thread Interrupted:" + interrupted);
+                logger.info("First thread Interrupted:.." + interrupted);
             }finally{
                 logger.info("First thread Unlocking");
                 lock.unlock();
             }
         });
         thread1.start();
-        Thread.sleep(1000);
+        Thread.sleep(50);
         Thread thread2 = new Thread(()->{
         lock.lock();
             try{
@@ -113,17 +113,17 @@ public class JavaInterruptTest{
             }
         });
         thread2.start();
-        Thread.sleep(1000);
-        logger.info("Interrupting first thread");
+        Thread.sleep(50);
         thread1.interrupt();
-        Thread.sleep(1000);
+        logger.info("Interrupted first thread");
+        Thread.sleep(50);
         boolean interrupted;
         interrupted = thread1.isInterrupted();
-        logger.info("First thread Interrupted:" + interrupted);
+        logger.info("First thread Interrupted:" + interrupted + ". HUH????");
         // huh? The thread was interrupted but the interrupt flag is not set
         logger.info("Releasing lock on second thread");
         latch.countDown();
-        Thread.sleep(1000);
+        Thread.sleep(50);
     }
 
 }
